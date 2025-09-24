@@ -1,0 +1,146 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Checkout - Coffee Shop{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title is-1 has-text-centered mb-6">
+            <i class="fas fa-credit-card"></i>
+            Checkout
+        </h1>
+
+        <div class="columns">
+            <!-- Customer Information Form -->
+            <div class="column is-half">
+                <div class="card">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            <i class="fas fa-user"></i>
+                            <span class="ml-2">Customer Information</span>
+                        </p>
+                    </header>
+                    <div class="card-content">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="field">
+                                <label class="label">Customer Name *</label>
+                                <div class="control has-icons-left">
+                                    <input class="input" type="text" name="customer_name" 
+                                           placeholder="Enter your full name" required>
+                                    <span class="icon is-small is-left">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label class="label">Email Address</label>
+                                <div class="control has-icons-left">
+                                    <input class="input" type="email" name="customer_email" 
+                                           placeholder="Enter your email (optional)">
+                                    <span class="icon is-small is-left">
+                                        <i class="fas fa-envelope"></i>
+                                    </span>
+                                </div>
+                                <p class="help">We'll use this to send you order updates</p>
+                            </div>
+
+                            <div class="field">
+                                <div class="control">
+                                    <button class="button is-primary is-fullwidth is-large" type="submit">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span class="ml-2">Place Order - ${{ total }}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="column is-half">
+                <div class="card">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            <i class="fas fa-receipt"></i>
+                            <span class="ml-2">Order Summary</span>
+                        </p>
+                    </header>
+                    <div class="card-content">
+                        <div class="content">
+                            {% for item in cart_items %}
+                            <div class="columns is-mobile is-vcentered mb-3">
+                                <div class="column is-narrow">
+                                    {% if item.product.image %}
+                                    <figure class="image is-48x48">
+                                        <img src="{{ item.product.image }}" alt="{{ item.product.name }}" 
+                                             style="object-fit: cover; border-radius: 4px;">
+                                    </figure>
+                                    {% else %}
+                                    <div class="has-background-light has-text-centered" 
+                                         style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+                                        <i class="fas fa-coffee has-text-grey is-size-7"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="column">
+                                    <p class="has-text-weight-bold">{{ item.product.name }}</p>
+                                    <p class="is-size-7 has-text-grey">{{ item.product.category.name }}</p>
+                                    <p class="is-size-7">${{ item.product.price }} × {{ item.quantity }}</p>
+                                </div>
+                                <div class="column is-narrow">
+                                    <p class="has-text-weight-bold has-text-primary">${{ item.total }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            
+                            <hr>
+                            
+                            <div class="columns is-mobile">
+                                <div class="column">
+                                    <p class="title is-5">Total</p>
+                                </div>
+                                <div class="column is-narrow">
+                                    <p class="title is-5 has-text-primary">${{ total }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Info -->
+                <div class="card mt-4">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="ml-2">Payment Information</span>
+                        </p>
+                    </header>
+                    <div class="card-content">
+                        <div class="content">
+                            <p class="has-text-grey">
+                                <i class="fas fa-credit-card"></i>
+                                <span class="ml-2">This is a demo application. No actual payment processing.</span>
+                            </p>
+                            <p class="has-text-grey">
+                                <i class="fas fa-store"></i>
+                                <span class="ml-2">Please pay at the counter when you pick up your order.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back to Cart -->
+        <div class="has-text-centered mt-6">
+            <a class="button is-light" href="{% url 'cart' %}">
+                <i class="fas fa-arrow-left"></i>
+                <span class="ml-2">Back to Cart</span>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

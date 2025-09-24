@@ -1,0 +1,189 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Order Confirmation - Coffee Shop{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="has-text-centered mb-6">
+            <div class="has-text-success">
+                <i class="fas fa-check-circle" style="font-size: 4rem;"></i>
+            </div>
+            <h1 class="title is-1 mt-4">Order Confirmed!</h1>
+            <h2 class="subtitle is-4">Thank you for your order, {{ order.customer_name }}!</h2>
+        </div>
+
+        <div class="columns is-centered">
+            <div class="column is-two-thirds">
+                <!-- Order Details -->
+                <div class="card">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            <i class="fas fa-receipt"></i>
+                            <span class="ml-2">Order #{{ order.id }}</span>
+                        </p>
+                    </header>
+                    <div class="card-content">
+                        <div class="columns">
+                            <div class="column is-half">
+                                <h3 class="title is-5">Customer Information</h3>
+                                <p><strong>Name:</strong> {{ order.customer_name }}</p>
+                                {% if order.customer_email %}
+                                <p><strong>Email:</strong> {{ order.customer_email }}</p>
+                                {% endif %}
+                                <p><strong>Order Date:</strong> {{ order.created_at|date:"M d, Y g:i A" }}</p>
+                                <p><strong>Status:</strong> 
+                                    <span class="tag {% if order.status == 'pending' %}is-warning{% elif order.status == 'preparing' %}is-info{% elif order.status == 'ready' %}is-success{% elif order.status == 'completed' %}is-primary{% else %}is-danger{% endif %}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="column is-half">
+                                <h3 class="title is-5">Order Items</h3>
+                                {% for item in order.order_items.all %}
+                                <div class="is-flex is-justify-content-space-between mb-2">
+                                    <span>{{ item.product.name }} × {{ item.quantity }}</span>
+                                    <span>${{ item.get_total_price }}</span>
+                                </div>
+                                {% endfor %}
+                                <hr>
+                                <div class="is-flex is-justify-content-space-between has-text-weight-bold is-size-5">
+                                    <span>Total:</span>
+                                    <span class="has-text-primary">${{ order.total_amount }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- What's Next -->
+                <div class="card mt-5">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            <i class="fas fa-clock"></i>
+                            <span class="ml-2">What's Next?</span>
+                        </p>
+                    </header>
+                    <div class="card-content">
+                        <div class="content">
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-marker is-primary">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <p class="heading">Order Placed</p>
+                                        <p>Your order has been received and is being processed.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item">
+                                    <div class="timeline-marker {% if order.status == 'preparing' or order.status == 'ready' or order.status == 'completed' %}is-primary{% else %}is-grey{% endif %}">
+                                        <i class="fas fa-utensils"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <p class="heading">Preparing</p>
+                                        <p>Our team is preparing your delicious order.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item">
+                                    <div class="timeline-marker {% if order.status == 'ready' or order.status == 'completed' %}is-primary{% else %}is-grey{% endif %}">
+                                        <i class="fas fa-bell"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <p class="heading">Ready for Pickup</p>
+                                        <p>We'll notify you when your order is ready.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item">
+                                    <div class="timeline-marker {% if order.status == 'completed' %}is-primary{% else %}is-grey{% endif %}">
+                                        <i class="fas fa-heart"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <p class="heading">Enjoy!</p>
+                                        <p>Thank you for choosing our coffee shop!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="has-text-centered mt-6">
+                    <a class="button is-primary is-medium mr-3" href="{% url 'home' %}">
+                        <i class="fas fa-home"></i>
+                        <span class="ml-2">Back to Home</span>
+                    </a>
+                    <a class="button is-light is-medium" href="{% url 'product_list' %}">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span class="ml-2">Continue Shopping</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+/* Simple timeline styles */
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 2rem;
+}
+
+.timeline-item:before {
+    content: '';
+    position: absolute;
+    left: -1.5rem;
+    top: 2rem;
+    width: 2px;
+    height: 100%;
+    background-color: #dbdbdb;
+}
+
+.timeline-item:last-child:before {
+    display: none;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -2rem;
+    top: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-color: #dbdbdb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.75rem;
+}
+
+.timeline-marker.is-primary {
+    background-color: #3273dc;
+}
+
+.timeline-marker.is-grey {
+    background-color: #b5b5b5;
+}
+
+.timeline-content {
+    margin-left: 1rem;
+}
+
+.timeline-content .heading {
+    font-weight: 600;
+    color: #363636;
+    margin-bottom: 0.25rem;
+}
+</style>
+{% endblock %}

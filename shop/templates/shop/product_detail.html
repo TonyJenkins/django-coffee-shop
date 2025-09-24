@@ -1,0 +1,168 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}{{ product.name }} - Coffee Shop{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb mb-5" aria-label="breadcrumbs">
+            <ul>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'product_list' %}">Menu</a></li>
+                <li><a href="{% url 'product_list' %}?category={{ product.category.id }}">{{ product.category.name }}</a></li>
+                <li class="is-active"><a href="#" aria-current="page">{{ product.name }}</a></li>
+            </ul>
+        </nav>
+
+        <div class="columns">
+            <!-- Product Image -->
+            <div class="column is-half">
+                {% if product.image %}
+                <figure class="image is-square">
+                    <img src="{{ product.image }}" alt="{{ product.name }}" style="object-fit: cover; border-radius: 8px;">
+                </figure>
+                {% else %}
+                <div class="has-background-light has-text-centered" style="height: 400px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                    <div>
+                        <i class="fas fa-coffee has-text-grey" style="font-size: 4rem;"></i>
+                        <p class="has-text-grey mt-2">No image available</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Product Details -->
+            <div class="column is-half">
+                <div class="content">
+                    <h1 class="title is-2">{{ product.name }}</h1>
+                    <p class="subtitle is-4 has-text-primary">{{ product.category.name }}</p>
+                    
+                    <div class="mb-5">
+                        <span class="tag is-large is-primary is-light">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span class="ml-1">{{ product.price }}</span>
+                        </span>
+                        {% if product.is_available %}
+                            <span class="tag is-large is-success is-light ml-2">
+                                <i class="fas fa-check"></i>
+                                <span class="ml-1">Available</span>
+                            </span>
+                        {% else %}
+                            <span class="tag is-large is-danger is-light ml-2">
+                                <i class="fas fa-times"></i>
+                                <span class="ml-1">Out of Stock</span>
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="box">
+                        <h3 class="title is-5">Description</h3>
+                        <p class="is-size-6">{{ product.description }}</p>
+                    </div>
+
+                    {% if product.is_available %}
+                    <!-- Add to Cart Section -->
+                    <div class="box">
+                        <h3 class="title is-5">Add to Cart</h3>
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <div class="field has-addons">
+                                    <div class="control">
+                                        <button class="button" onclick="decreaseQuantity()">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    </div>
+                                    <div class="control">
+                                        <input class="input has-text-centered" type="number" 
+                                               value="1" min="1" max="10" 
+                                               id="product-quantity" style="width: 80px;">
+                                    </div>
+                                    <div class="control">
+                                        <button class="button" onclick="increaseQuantity()">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control">
+                                <button class="button is-primary is-large" onclick="addProductToCart()">
+                                    <i class="fas fa-cart-plus"></i>
+                                    <span class="ml-2">Add to Cart</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <span class="has-text-weight-bold">Total: $</span>
+                            <span id="total-price" class="has-text-weight-bold has-text-primary">{{ product.price }}</span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="box has-background-danger-light">
+                        <p class="has-text-danger has-text-weight-bold">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            This item is currently out of stock.
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Navigation -->
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <a class="button is-light" href="{% url 'product_list' %}">
+                                <i class="fas fa-arrow-left"></i>
+                                <span class="ml-1">Back to Menu</span>
+                            </a>
+                        </div>
+                        <div class="control">
+                            <a class="button is-info" href="{% url 'cart' %}">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="ml-1">View Cart</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    const productPrice = {{ product.price }};
+    const productId = {{ product.id }};
+
+    function updateTotalPrice() {
+        const quantity = parseInt(document.getElementById('product-quantity').value);
+        const total = (productPrice * quantity).toFixed(2);
+        document.getElementById('total-price').textContent = total;
+    }
+
+    function increaseQuantity() {
+        const input = document.getElementById('product-quantity');
+        const currentValue = parseInt(input.value);
+        if (currentValue < 10) {
+            input.value = currentValue + 1;
+            updateTotalPrice();
+        }
+    }
+
+    function decreaseQuantity() {
+        const input = document.getElementById('product-quantity');
+        const currentValue = parseInt(input.value);
+        if (currentValue > 1) {
+            input.value = currentValue - 1;
+            updateTotalPrice();
+        }
+    }
+
+    function addProductToCart() {
+        const quantity = parseInt(document.getElementById('product-quantity').value);
+        addToCart(productId, quantity);
+    }
+
+    // Update total price when quantity changes
+    document.getElementById('product-quantity').addEventListener('input', updateTotalPrice);
+</script>
+{% endblock %}

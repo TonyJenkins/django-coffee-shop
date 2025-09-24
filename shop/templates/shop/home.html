@@ -1,0 +1,139 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Welcome to Coffee Shop{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero hero-coffee is-medium">
+    <div class="hero-body">
+        <div class="container has-text-centered">
+            <h1 class="title is-1 has-text-white">
+                <i class="fas fa-coffee"></i>
+                Welcome to Coffee Shop
+            </h1>
+            <h2 class="subtitle is-4 has-text-white">
+                Premium coffee and delicious treats, served fresh daily
+            </h2>
+            <a class="button is-large is-light" href="{% url 'product_list' %}">
+                <i class="fas fa-shopping-bag"></i>
+                <span class="ml-2">Shop Now</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="section">
+    <div class="container">
+        <h2 class="title is-2 has-text-centered mb-6">Our Categories</h2>
+        <div class="columns is-multiline">
+            {% for category in categories %}
+            <div class="column is-one-third">
+                <div class="card card-hover">
+                    <div class="card-content has-text-centered">
+                        <div class="content">
+                            <h3 class="title is-4">{{ category.name }}</h3>
+                            <p class="subtitle is-6">{{ category.description|default:"Explore our selection" }}</p>
+                            <a class="button is-primary" href="{% url 'product_list' %}?category={{ category.id }}">
+                                View {{ category.name }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="column is-full">
+                <div class="has-text-centered">
+                    <p class="title is-4">No categories available</p>
+                    <p class="subtitle">Check back soon for our menu!</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products Section -->
+<section class="section has-background-light">
+    <div class="container">
+        <h2 class="title is-2 has-text-centered mb-6">Featured Items</h2>
+        <div class="columns is-multiline">
+            {% for product in featured_products %}
+            <div class="column is-one-third">
+                <div class="card card-hover">
+                    {% if product.image %}
+                    <div class="card-image">
+                        <figure class="image is-4by3">
+                            <img src="{{ product.image }}" alt="{{ product.name }}" style="object-fit: cover;">
+                        </figure>
+                    </div>
+                    {% endif %}
+                    <div class="card-content">
+                        <div class="media">
+                            <div class="media-content">
+                                <p class="title is-5">{{ product.name }}</p>
+                                <p class="subtitle is-6">{{ product.category.name }}</p>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <p>{{ product.description|truncatewords:20 }}</p>
+                            <div class="is-flex is-justify-content-space-between is-align-items-center">
+                                <span class="price-tag">${{ product.price }}</span>
+                                <button class="button is-primary" onclick="addToCart({{ product.id }})">
+                                    <i class="fas fa-cart-plus"></i>
+                                    <span class="ml-1">Add to Cart</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="column is-full">
+                <div class="has-text-centered">
+                    <p class="title is-4">No products available</p>
+                    <p class="subtitle">Check back soon for our delicious offerings!</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if featured_products %}
+        <div class="has-text-centered mt-6">
+            <a class="button is-large is-primary" href="{% url 'product_list' %}">
+                <i class="fas fa-eye"></i>
+                <span class="ml-2">View All Products</span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="section">
+    <div class="container">
+        <div class="columns is-vcentered">
+            <div class="column is-half">
+                <h2 class="title is-2">About Our Coffee Shop</h2>
+                <div class="content is-medium">
+                    <p>
+                        Welcome to our cozy coffee shop, where passion meets perfection in every cup. 
+                        We source the finest beans from around the world and roast them to perfection, 
+                        ensuring that every sip delivers an exceptional experience.
+                    </p>
+                    <p>
+                        Our skilled baristas craft each drink with care, and our bakers create fresh 
+                        pastries daily. Whether you're looking for your morning fuel or an afternoon 
+                        treat, we have something special waiting for you.
+                    </p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="has-text-centered">
+                    <i class="fas fa-coffee has-text-primary" style="font-size: 8rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
