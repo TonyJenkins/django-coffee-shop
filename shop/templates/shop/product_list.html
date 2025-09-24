@@ -1,0 +1,150 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}
+    {% if selected_category %}{{ selected_category.name }} - {% endif %}Menu - Coffee Shop
+{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <!-- Header -->
+        <div class="has-text-centered mb-6">
+            <h1 class="title is-1">
+                {% if selected_category %}
+                    {{ selected_category.name }}
+                {% else %}
+                    Our Menu
+                {% endif %}
+            </h1>
+            {% if selected_category %}
+                <p class="subtitle is-4">{{ selected_category.description }}</p>
+            {% else %}
+                <p class="subtitle is-4">Discover our delicious selection of coffee and treats</p>
+            {% endif %}
+        </div>
+
+        <!-- Category Filter -->
+        <div class="box mb-6">
+            <div class="field is-grouped is-grouped-centered">
+                <div class="control">
+                    <a class="button {% if not selected_category %}is-primary{% endif %}" href="{% url 'product_list' %}">
+                        All Items
+                    </a>
+                </div>
+                {% for category in categories %}
+                <div class="control">
+                    <a class="button {% if selected_category.id == category.id %}is-primary{% endif %}" 
+                       href="{% url 'product_list' %}?category={{ category.id }}">
+                        {{ category.name }}
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="columns is-multiline">
+            {% for product in products %}
+            <div class="column is-one-third">
+                <div class="card card-hover">
+                    {% if product.image %}
+                    <div class="card-image">
+                        <figure class="image is-4by3">
+                            <img src="{{ product.image }}" alt="{{ product.name }}" style="object-fit: cover;">
+                        </figure>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="card-content">
+                        <div class="media">
+                            <div class="media-content">
+                                <p class="title is-5">{{ product.name }}</p>
+                                <p class="subtitle is-6 has-text-grey">{{ product.category.name }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="content">
+                            <p>{{ product.description|truncatewords:15 }}</p>
+                            
+                            <div class="is-flex is-justify-content-space-between is-align-items-center mt-4">
+                                <span class="price-tag">${{ product.price }}</span>
+                                <div class="field has-addons">
+                                    <div class="control">
+                                        <input class="input is-small" type="number" value="1" min="1" max="10" 
+                                               id="quantity-{{ product.id }}" style="width: 60px;">
+                                    </div>
+                                    <div class="control">
+                                        <button class="button is-primary is-small" 
+                                                onclick="addToCartWithQuantity({{ product.id }})">
+                                            <i class="fas fa-cart-plus"></i>
+                                            <span class="ml-1">Add</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <footer class="card-footer">
+                        <a href="{% url 'product_detail' product.pk %}" class="card-footer-item">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="ml-1">View Details</span>
+                        </a>
+                    </footer>
+                </div>
+            </div>
+            {% empty %}
+            <div class="column is-full">
+                <div class="has-text-centered">
+                    <div class="box">
+                        <i class="fas fa-coffee has-text-grey" style="font-size: 4rem;"></i>
+                        <h3 class="title is-4 mt-4">No products found</h3>
+                        {% if selected_category %}
+                            <p class="subtitle">No items available in {{ selected_category.name }} category.</p>
+                            <a class="button is-primary" href="{% url 'product_list' %}">View All Products</a>
+                        {% else %}
+                            <p class="subtitle">Check back soon for our delicious offerings!</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Back to top -->
+        {% if products %}
+        <div class="has-text-centered mt-6">
+            <a class="button is-light" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                <i class="fas fa-arrow-up"></i>
+                <span class="ml-1">Back to Top</span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    function addToCartWithQuantity(productId) {
+        const quantity = parseInt(document.getElementById(`quantity-${productId}`).value);
+        addToCart(productId, quantity);
+    }
+
+    // For the grid view buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add event listeners to all Add buttons in the grid
+        document.querySelectorAll('button[onclick*="addToCartWithQuantity"]').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const onclick = this.getAttribute('onclick');
+                const match = onclick.match(/addToCartWithQuantity\((\d+)\)/);
+                if (match) {
+                    const productId = match[1];
+                    addToCartWithQuantity(productId);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

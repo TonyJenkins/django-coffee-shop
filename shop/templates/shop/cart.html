@@ -1,0 +1,186 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Shopping Cart - Coffee Shop{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title is-1 has-text-centered mb-6">
+            <i class="fas fa-shopping-cart"></i>
+            Shopping Cart
+        </h1>
+
+        {% if cart_items %}
+        <div class="columns">
+            <!-- Cart Items -->
+            <div class="column is-two-thirds">
+                {% for item in cart_items %}
+                <div class="card mb-4">
+                    <div class="card-content">
+                        <div class="columns is-mobile is-vcentered">
+                            <!-- Product Image -->
+                            <div class="column is-narrow">
+                                {% if item.product.image %}
+                                <figure class="image is-96x96">
+                                    <img src="{{ item.product.image }}" alt="{{ item.product.name }}" 
+                                         style="object-fit: cover; border-radius: 8px;">
+                                </figure>
+                                {% else %}
+                                <div class="has-background-light has-text-centered" 
+                                     style="width: 96px; height: 96px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                                    <i class="fas fa-coffee has-text-grey"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Product Info -->
+                            <div class="column">
+                                <h3 class="title is-5">{{ item.product.name }}</h3>
+                                <p class="subtitle is-6 has-text-grey">{{ item.product.category.name }}</p>
+                                <p class="has-text-primary has-text-weight-bold">${{ item.product.price }} each</p>
+                            </div>
+
+                            <!-- Quantity Controls -->
+                            <div class="column is-narrow">
+                                <div class="field has-addons">
+                                    <div class="control">
+                                        <button class="button is-small" 
+                                                onclick="updateCartQuantity({{ item.product.id }}, {{ item.quantity|add:'-1' }})">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    </div>
+                                    <div class="control">
+                                        <input class="input is-small has-text-centered" 
+                                               type="number" value="{{ item.quantity }}" 
+                                               min="0" max="10" style="width: 60px;"
+                                               onchange="updateCartQuantity({{ item.product.id }}, this.value)">
+                                    </div>
+                                    <div class="control">
+                                        <button class="button is-small" 
+                                                onclick="updateCartQuantity({{ item.product.id }}, {{ item.quantity|add:'1' }})">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Item Total -->
+                            <div class="column is-narrow has-text-right">
+                                <p class="title is-5 has-text-primary">${{ item.total }}</p>
+                                <button class="button is-small is-danger is-light" 
+                                        onclick="removeFromCart({{ item.product.id }})">
+                                    <i class="fas fa-trash"></i>
+                                    <span class="ml-1">Remove</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Order Summary -->
+            <div class="column is-one-third">
+                <div class="card">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            <i class="fas fa-receipt"></i>
+                            <span class="ml-2">Order Summary</span>
+                        </p>
+                    </header>
+                    <div class="card-content">
+                        <div class="content">
+                            {% for item in cart_items %}
+                            <div class="is-flex is-justify-content-space-between">
+                                <span>{{ item.product.name }} × {{ item.quantity }}</span>
+                                <span>${{ item.total }}</span>
+                            </div>
+                            {% endfor %}
+                            
+                            <hr>
+                            
+                            <div class="is-flex is-justify-content-space-between has-text-weight-bold is-size-5">
+                                <span>Total:</span>
+                                <span class="has-text-primary">${{ total }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <footer class="card-footer">
+                        <a href="{% url 'checkout' %}" class="card-footer-item button is-primary is-medium">
+                            <i class="fas fa-credit-card"></i>
+                            <span class="ml-2">Proceed to Checkout</span>
+                        </a>
+                    </footer>
+                </div>
+            </div>
+        </div>
+
+        <!-- Continue Shopping -->
+        <div class="has-text-centered mt-6">
+            <a class="button is-light is-medium" href="{% url 'product_list' %}">
+                <i class="fas fa-arrow-left"></i>
+                <span class="ml-2">Continue Shopping</span>
+            </a>
+        </div>
+
+        {% else %}
+        <!-- Empty Cart -->
+        <div class="has-text-centered">
+            <div class="box">
+                <i class="fas fa-shopping-cart has-text-grey" style="font-size: 4rem;"></i>
+                <h2 class="title is-3 mt-4">Your cart is empty</h2>
+                <p class="subtitle">Add some delicious items from our menu!</p>
+                <a class="button is-primary is-large" href="{% url 'product_list' %}">
+                    <i class="fas fa-coffee"></i>
+                    <span class="ml-2">Browse Menu</span>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    function updateCartQuantity(productId, quantity) {
+        quantity = parseInt(quantity);
+        
+        fetch('{% url "update_cart" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrftoken,
+            },
+            body: `product_id=${productId}&quantity=${quantity}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload(); // Refresh the page to update totals
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function removeFromCart(productId) {
+        if (confirm('Are you sure you want to remove this item from your cart?')) {
+            fetch('{% url "remove_from_cart" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrftoken,
+                },
+                body: `product_id=${productId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); // Refresh the page
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    }
+</script>
+{% endblock %}
