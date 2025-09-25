@@ -1,6 +1,6 @@
 # Coffee Shop Django Application
 
-A Django web application for managing a small coffee shop, built with Bulma CSS framework for modern and responsive styling.
+A basic Django web application for managing a small coffee shop, built with Bulma CSS framework for modern and responsive styling.
 
 ## Features
 
